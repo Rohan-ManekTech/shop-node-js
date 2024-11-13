@@ -1,23 +1,37 @@
 const express = require("express");
-const app = express();
 const mongoose = require("mongoose");
 const dotenv = require("dotenv");
+const cors = require("cors");
+
 const userRoute = require("./routes/user");
 const authRoute = require("./routes/auth");
 const productRoute = require("./routes/product");
 const cartRoute = require("./routes/cart");
 const orderRoute = require("./routes/order");
 const stripeRoute = require("./routes/stripe");
-const cors = require("cors");
-
 
 dotenv.config();
 
-mongoose.connect(process.env.MONGO_URL)
-  .then(() => console.log("DB Connection Successful"))
-  .catch((err) => {
+const app = express();
+
+let isConnected;
+
+const connectDB = async () => {
+  if (isConnected) {
+    console.log("Using existing database connection");
+    return;
+  }
+  try {
+    await mongoose.connect(process.env.MONGO_URL, {
+      useNewUrlParser: true,
+      useUnifiedTopology: true,
+    });
+    isConnected = mongoose.connection.readyState;
+    console.log("DB Connection Successful");
+  } catch (err) {
     console.error("DB Connection Error:", err);
-  });
+  }
+};
 
 app.use(cors());
 app.use(express.json());
@@ -29,8 +43,10 @@ app.use("/api/carts", cartRoute);
 app.use("/api/orders", orderRoute);
 app.use("/api/checkout", stripeRoute);
 
-
-
-app.listen(process.env.PORT || 4000, () => {
-  console.log("Backend server is running!");
+// Middleware to ensure DB connection
+app.use(async (req, res, next) => {
+  await connectDB();
+  next();
 });
+
+module.exports = app;
