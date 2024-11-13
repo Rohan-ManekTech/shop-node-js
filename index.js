@@ -17,16 +17,12 @@ const app = express();
 // Connect to DB once when the server starts
 const connectDB = async () => {
   try {
-    // Make sure we're not connecting multiple times
-    const connection = await mongoose.connect(process.env.MONGO_URL, {
-      useNewUrlParser: true,
-      useUnifiedTopology: true,
-    });
-
+    // No need for useNewUrlParser and useUnifiedTopology in recent versions
+    const connection = await mongoose.connect(process.env.MONGO_URL);
     console.log("DB Connection Successful");
   } catch (err) {
     console.error("DB Connection Error:", err);
-    process.exit(1); // Exit the app if the DB connection fails
+    process.exit(1); // Exit the app if DB connection fails
   }
 };
 
