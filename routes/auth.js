@@ -5,7 +5,7 @@ const jwt = require("jsonwebtoken");
 const { body, validationResult } = require("express-validator");
 
 // Importing response helper
-const responseModel = require("../helpers/responseModel");
+const responseModel = require("../response/responseModel");
 
 // REGISTER
 router.post(
